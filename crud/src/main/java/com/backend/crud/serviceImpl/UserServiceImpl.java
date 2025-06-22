@@ -29,13 +29,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUserById(User user, String id) {
+    public User updateUserById(String id, String name, String email, String mobile) {
         Optional<User> userIsFound = userRepository.findById(id);
         if(userIsFound.isPresent()){
             User usr = userIsFound.get();
-            usr.setName(user.getName());
-            usr.setEmail(user.getEmail());
-            usr.setMobile(user.getMobile());
+            usr.setName(name);
+            usr.setEmail(email);
+            usr.setMobile(mobile);
             return userRepository.save(usr);
         }
         return null;

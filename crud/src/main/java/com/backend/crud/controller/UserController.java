@@ -1,19 +1,23 @@
 package com.backend.crud.controller;
 
+import com.backend.crud.dto.UserDto;
 import com.backend.crud.model.User;
 import com.backend.crud.serviceImpl.UserServiceImpl;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("api/auth")
+@Validated
 public class UserController {
 
     @Autowired
@@ -34,7 +38,7 @@ public class UserController {
     }
 
     @PostMapping("/store")
-    public ResponseEntity<Map<String,Object>> createUser(@RequestBody User user){
+    public ResponseEntity<Map<String,Object>> createUser(@Valid @RequestBody UserDto user){
         Map<String,Object> res = new HashMap<>();
         User usr = new User();
         usr.setName(user.getName());
@@ -47,7 +51,7 @@ public class UserController {
     }
 
     @GetMapping("/edit")
-    public ResponseEntity<Map<String,Object>> getUserById(@RequestParam("id") String id){
+    public ResponseEntity<Map<String,Object>> getUserById(@RequestParam("id") @NotBlank(message = "ID is required") String id){
         Map<String,Object> res = new HashMap<>();
         Optional<User> usr = userService.getUserById(id);
         if(usr.isEmpty()){
@@ -62,9 +66,9 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Map<String,Object>> updateUserById(@RequestParam("id") String id,@RequestBody User user){
+    public ResponseEntity<Map<String,Object>> updateUserById(@RequestParam("id") @NotBlank(message = "ID is required") String id,@Valid @RequestBody UserDto dt){
         Map<String,Object> res = new HashMap<>();
-        User usr = userService.updateUserById(user,id);
+        User usr = userService.updateUserById(id,dt.getName(), dt.getEmail(), dt.getMobile());
         if(usr==null){
             res.put("status", HttpStatus.BAD_REQUEST.value());
             res.put("message","Failed to Update!");
@@ -73,11 +77,12 @@ public class UserController {
             res.put("message","Data Stored Successfully!");
             res.put("data",usr);
         }
+//        res.put("data",user);
         return new ResponseEntity<>(res,HttpStatus.OK);
     }
 
     @DeleteMapping("/del")
-    public ResponseEntity<Map<String,Object>> deleteUserById(@RequestParam("id") String id){
+    public ResponseEntity<Map<String,Object>> deleteUserById(@RequestParam("id") @NotBlank(message = "ID is required") String id){
         Map<String,Object> res = new HashMap<>();
         boolean b = userService.deleteUserById(id);
         if(b){
